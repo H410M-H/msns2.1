@@ -1,53 +1,236 @@
-import Link from "next/link";
+"use client"
 
-import { LatestPost } from "~/app/_components/post";
-import { api, HydrateClient } from "~/trpc/server";
+import { type ReactNode, useEffect, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import Link from 'next/link'
+import { Button } from "~/components/ui/button"
+import { ChevronRight, GraduationCap, Book, Users, Calendar } from 'lucide-react'
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-
-  void api.post.getLatest.prefetch();
+export default function Home() {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
+  const { scrollY } = useScroll()
+  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0])
+  const heroScale = useTransform(scrollY, [0, 600], [1, 0.8])
+  const linkCards = [
+    {
+      title: "Enroll Now →",
+      href: "/dashboard",
+    },
+    {
+      title: "Our Socials →",
+      href: "https://www.instagram.com/msnazhighschool/",
+    },
+  ];
+  const videos = [
+    "https://res.cloudinary.com/dvvbxrs55/video/upload/f_auto,q_auto,w_auto/v1729269611/clip1_awtegx",
+    "https://res.cloudinary.com/dvvbxrs55/video/upload/f_auto,q_auto,w_auto/v1729269805/clip4_stlpus",
+    "https://res.cloudinary.com/dvvbxrs55/video/upload/f_auto,q_auto,w_auto/v1729269611/clip1_awtegx",
+    "https://res.cloudinary.com/dvvbxrs55/video/upload/f_auto,q_auto,w_auto/v1729267740/clip5_szbx9z",
+  ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [videos.length])
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
+    <div className="min-h-screen bg-emerald-100 font-serif">
+      {/* Hero Section */}
+      <motion.section
+        className="relative h-[85vh] overflow-hidden"
+        style={{ opacity: heroOpacity, scale: heroScale }}
+      >
+        <video
+          key={currentVideoIndex}
+          className="absolute top-16 left-0 w-full h-full object-cover"
+          autoPlay={true}
+          muted={true}
+          loop={true}
+          playsInline={true}>
+          <source src={videos[currentVideoIndex]} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="text-center text-green-100">
+            <motion.h1
+              className="font-serif text-white text-5xl md:text-7xl font-bold mb-10"
+              initial={{ opacity: 0, y: 20, scale: 0.5 }}
+              animate={{
+                opacity: [0, 1],
+                y: [20, 0],
+                scale: [0.5, 1.2],
+              }}
+              transition={{
+                duration: 0.8,
+                delay: 0.8,
+                ease: "easeOut",
+                type: "keyframes",
+                stiffness: 100,
+              }}
             >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
+              M.S. NAZ HIGH SCHOOL
+            </motion.h1>
+            <motion.p
+              className="font-serif text-2xl md:text-3xl mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
+              PURSUIT OF EXCELLENCE
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <Link href={'/about'}>
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-300">
+                  Learn More <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
-
-          <LatestPost />
         </div>
-      </main>
-    </HydrateClient>
-  );
+      </motion.section>
+
+      {/* Quick Links Section */}
+      <section className="py-4 px-4 md:px-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2
+            className="text-3xl font-bold mb-4 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 1.5 }}
+          >
+            Quick Links
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {linkCards.map((card, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <Link href={card.href}>
+                  <Card className="bg-green-800 text-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <CardHeader>
+                      <CardTitle>{card.title}</CardTitle>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="bg-white py-16 px-4 md:px-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2
+            className="text-3xl font-bold mb-12 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            Why Choose M.S. Naz High School?
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <FeatureCard
+              icon={<GraduationCap className="h-12 w-12 text-primary" />}
+              title="Academic Excellence"
+              description="Our rigorous curriculum prepares students for success in higher education and beyond."
+              delay={0}
+            />
+            <FeatureCard
+              icon={<Users className="h-12 w-12 text-primary" />}
+              title="Dedicated Faculty"
+              description="Experienced teachers committed to nurturing each student's potential."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={<Book className="h-12 w-12 text-primary" />}
+              title="Diverse Programs"
+              description="A wide range of academic and extracurricular activities to foster well-rounded development."
+              delay={0.4}
+            />
+            <FeatureCard
+              icon={<Calendar className="h-12 w-12 text-primary" />}
+              title="Modern Facilities"
+              description="State-of-the-art classrooms, labs, and sports facilities to enhance learning experiences."
+              delay={0.6}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-green-700 text-primary-foreground py-16 px-4 md:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h2
+            className="text-3xl font-bold mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            Ready to Join Our Community?
+          </motion.h2>
+          <motion.p
+            className="text-xl mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Take the first step towards a bright future with M.S. Naz High School.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <Link href={'/signup'}>
+              <Button size="lg" className="bg-emerald-500 text-primary-foreground hover:bg-primary/90 transition-colors duration-300">
+                Apply Now <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+interface FeatureCardProps {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  delay: number;
+}
+
+function FeatureCard({ icon, title, description, delay }: FeatureCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay }}
+    >
+      <Card className="text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <CardContent className="pt-6">
+          <div className="mb-4 flex justify-center">{icon}</div>
+          <CardTitle className="mb-2">{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
 }
